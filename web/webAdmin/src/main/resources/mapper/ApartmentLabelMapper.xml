@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WebAdmin.mapper.ApartmentLabelMapper">
+
+    <select id="getLabelByApartmentId" resultType="model.entity.LabelInfo">
+        select id,type,name
+        from label_info li
+                 right join (select apartment_id,label_id
+                             from apartment_label
+                             where is_deleted = 0 and apartment_id = #{id}) al
+                            on al.label_id = li.id
+        where li.is_deleted = 0
+    </select>
+</mapper>

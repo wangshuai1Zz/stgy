@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WebAdmin.mapper.ApartmentInfoMapper">
+
+    <select id="getPages" resultType="WebAdmin.vo.apartment.ApartmentItemVo">
+        select
+            ai.id,
+            ai.name,
+            ai.introduction,
+            ai.district_id,
+            ai.district_name,ai.city_id, city_name,ai.province_id,
+            ai.province_name,ai.address_detail,ai.latitude,
+            ai.longitude,ai.phone,ai.is_release,
+            tr.count as totalRoomCount,
+            ifnull(tr.count-fr.count,tr.count) as freeRoomCount
+        from stgy.apartment_info ai
+                 left join (
+            select apartment_id,count(id) as count
+            from room_info
+            where is_deleted = 0
+            group by apartment_id
+        ) tr on tr.apartment_id = ai.id
+                 left join (
+            select apartment_id,count(apartment_id) as count
+            from lease_agreement
+            where status in (2,5,7) and is_deleted=0
+            group by apartment_id
+        ) fr on fr.apartment_id = ai.id
+        <where>
+            ai.is_deleted = 0
+            <if test="query.provinceId != null and query.provinceId != ''">
+                and province_id=#{query.provinceId}
+            </if>
+            <if test="query.cityId != null and query.cityId != ''">
+                and city_id=#{query.cityId}
+            </if>
+            <if test="query.districtId != null and query.districtId != ''">
+                and district_id=#{query.districtId}
+            </if>
+        </where>
+    </select>
+</mapper>

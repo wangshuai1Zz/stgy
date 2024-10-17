@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WebAdmin.mapper.LeaseAgreementMapper">
+
+    <sql id="BaseCheck">
+        select
+            la.id as la_id,
+            la.phone as la_phone,
+            la.name as la_name,
+            la.identification_number as la_identification_number,
+            la.apartment_id as la_apartment_id,
+            la.room_id as la_room_id,
+            la.lease_start_date as la_lease_start_date,
+            la.lease_end_date as la_lease_end_date,
+            la.lease_term_id as la_lease_term_id,
+            la.rent as la_rent,
+            la.deposit as la_deposit,
+            la.payment_type_id as la_payment_type_id,
+            la.status as la_status,
+            la.source_type as la_source_type,
+            la.additional_info as la_additional_info,
+            ai.id as ai_id,
+            ai.name as ai_name,
+            ai.introduction as ai_introduction,
+            ai.district_id as ai_district_id,
+            ai.district_name as ai_district_name,
+            ai.city_id as ai_city_id,
+            ai.city_name as ai_city_name,
+            ai.province_id as ai_province_id,
+            ai.province_name as ai_province_name,
+            ai.address_detail as ai_address_detail,
+            ai.latitude as ai_latitude,
+            ai.longitude as ai_longitude,
+            ai.phone as ai_phone,
+            ai.is_release as ai_is_release,
+            ri.id as ri_id,
+            ri.room_number as ri_room_number,
+            ri.rent as ri_rent,
+            ri.apartment_id as ri_apartment_id,
+            ri.is_release as ri_is_release,
+            pt.id as pt_id,
+            pt.name as pt_name,
+            pt.pay_month_count as pt_pay_month_count,
+            pt.additional_info as pt_additional_info,
+            lt.id as lt_id,
+            lt.month_count as lt_month_count,
+            lt.unit as lt_unit
+        from lease_agreement la
+                 left join apartment_info ai on ai.id = la.apartment_id and ai.is_deleted = 0
+                 left join room_info ri on ri.id = la.room_id and ri.is_deleted = 0
+                 left join payment_type pt on pt.id = la.payment_type_id and pt.is_deleted = 0
+                 left join lease_term lt on lt.id = la.lease_term_id and lt.is_deleted = 0
+    </sql>
+
+
+    <resultMap id="getAgreement" type="WebAdmin.vo.agreement.AgreementVo">
+        <id property="id" column="la_id" />
+        <result property="phone" column="la_phone" />
+        <result property="name" column="la_name" />
+        <result property="identificationNumber" column="la_identification_number" />
+        <result property="apartmentId" column="la_apartment_id" />
+        <result property="roomId" column="la_room_id" />
+        <result property="leaseStartDate" column="la_lease_start_date" />
+        <result property="leaseEndDate" column="la_lease_end_date" />
+        <result property="leaseTermId" column="la_lease_term_id" />
+        <result property="rent" column="la_rent" />
+        <result property="deposit" column="la_deposit" />
+        <result property="paymentTypeId" column="la_payment_type_id" />
+        <result property="status" column="la_status" />
+        <result property="sourceType" column="la_source_type" />
+        <result property="additionalInfo" column="la_additional_info" />
+
+        <association property="apartmentInfo" javaType="model.entity.ApartmentInfo">
+            <id property="id" column="ai_id" />
+            <result property="name" column="ai_name" />
+            <result property="introduction" column="ai_introduction" />
+            <result property="districtId" column="ai_district_id" />
+            <result property="districtName" column="ai_district_name" />
+            <result property="cityId" column="ai_city_id" />
+            <result property="cityName" column="ai_city_name" />
+            <result property="provinceId" column="ai_province_id" />
+            <result property="provinceName" column="ai_province_name" />
+            <result property="addressDetail" column="ai_address_detail" />
+            <result property="latitude" column="ai_latitude" />
+            <result property="longitude" column="ai_longitude" />
+            <result property="phone" column="ai_phone" />
+            <result property="isRelease" column="ai_is_release" />
+        </association>
+
+        <association property="roomInfo" javaType="model.entity.RoomInfo">
+            <id property="id" column="ri_id" />
+            <result property="roomNumber" column="ri_room_number" />
+            <result property="rent" column="ri_rent" />
+            <result property="apartmentId" column="ri_apartment_id" />
+            <result property="isRelease" column="ri_is_release" />
+        </association>
+
+        <association property="paymentType" javaType="model.entity.PaymentType">
+            <id property="id" column="pt_id" />
+            <result property="name" column="pt_name" />
+            <result property="payMonthCount" column="pt_pay_month_count" />
+            <result property="additionalInfo" column="pt_additional_info" />
+        </association>
+
+        <association property="leaseTerm" javaType="model.entity.LeaseTerm">
+            <id property="id" column="lt_id" />
+            <result property="monthCount" column="lt_month_count" />
+            <result property="unit" column="lt_unit" />
+        </association>
+    </resultMap>
+
+    <select id="getAgreementById" resultMap="getAgreement">
+        <include refid="BaseCheck"/>
+        where la.is_deleted = 0 and la.id = #{id};
+    </select>
+
+    <select id="getAgreementPage" resultMap="getAgreement">
+        <include refid="BaseCheck"/>
+        <where>
+            <if test="query.provinceId != null and query.provinceId != '' ">
+                and ai.province_id = #{query.provinceId}
+            </if>
+            <if test="query.cityId != null and query.cityId != ''">
+                and ai.city_id = #{query.cityId}
+            </if>
+            <if test="query.districtId != null and query.districtId != ''">
+                and ai.district_id = #{query.districtId}
+            </if>
+            <if test="query.apartmentId != null and query.apartmentId != ''">
+                and la.apartment_id = #{query.apartmentId}
+            </if>
+            <if test="query.roomNumber != null and query.roomNumber.trim() != ''">
+                and ri.room_number = #{query.roomNumber}
+            </if>
+            <if test="query.name != null and query.name.trim() != ''">
+                and la.name like CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.phone != null and query.phone.trim() != ''">
+                and la.phone = #{query.phone}
+            </if>
+        </where>
+    </select>
+</mapper>

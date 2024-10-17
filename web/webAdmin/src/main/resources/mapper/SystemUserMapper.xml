@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WebAdmin.mapper.SystemUserMapper">
+
+    <sql id="BaseSelect">
+        select su.id,
+               su.username,
+               su.password,
+               su.name,
+               su.type,
+               su.phone,
+               su.avatar_url,
+               su.additional_info,
+               su.post_id,
+               su.status,
+               sp.name as postName
+        from system_user su
+                 left join system_post sp on su.post_id = sp.id and sp.is_deleted = 0
+    </sql>
+
+    <select id="getPage" resultType="WebAdmin.vo.system.user.SystemUserItemVo">
+        <include refid="BaseSelect"/>
+        <where>
+            su.is_deleted = 0
+            <if test="query.name != null and query.name != ''">
+                and su.name = #{query.name}
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                and su.phone = #{query.phone}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUser" resultType="WebAdmin.vo.system.user.SystemUserItemVo">
+        <include refid="BaseSelect"/>
+        where su.is_deleted = 0 and su.id = #{id}
+    </select>
+</mapper>

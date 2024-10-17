@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WebAdmin.mapper.ViewAppointmentMapper">
+
+    <resultMap id="getPages" type="WebAdmin.vo.appointment.AppointmentVo">
+        <id column="id" property="id"/>
+        <result column="userId" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="UserPhone" property="phone"/>
+        <result column="userApartmentId" property="apartmentId"/>
+        <result column="appointmentTime" property="appointmentTime"/>
+        <result column="additionalInfo" property="additionalInfo"/>
+        <result column="appointmentStatus" property="appointmentStatus"/>
+        <association property="apartmentInfo" javaType="model.entity.ApartmentInfo">
+            <result column="apartmentId" property="id"/>
+            <result column="apartmentName" property="name"/>
+            <result column="introduction" property="introduction"/>
+            <result column="districtId" property="districtId"/>
+            <result column="districtName" property="districtName"/>
+            <result column="cityId" property="cityId"/>
+            <result column="cityName" property="cityName"/>
+            <result column="provinceId" property="provinceId"/>
+            <result column="provinceName" property="provinceName"/>
+            <result column="addressDetail" property="addressDetail"/>
+            <result column="latitude" property="latitude"/>
+            <result column="longitude" property="longitude"/>
+            <result column="phone" property="phone"/>
+            <result column="isRelease" property="isRelease"/>
+        </association>
+    </resultMap>
+    <select id="getViewPages" resultMap="getPages">
+        select va.id as id,
+               va.user_id as userId,
+               va.name as name,
+               va.phone as UserPhone,
+               va.apartment_id as userApartmentId,
+               va.appointment_time as appointmentTime,
+               va.additional_info as additionalInfo,
+               va.appointment_status as appointmentStatus,
+               ai.id as apartmentId,
+               ai.name as apartmentName,
+               ai.introduction as introduction,
+               ai.district_id as districtId,
+               ai.district_name as districtName,
+               ai.city_id as cityId,
+               ai.city_name as cityName,
+               ai.province_id as provinceId,
+               ai.province_name as provinceName,
+               ai.address_detail as addressDetail,
+               ai.latitude as latitude,
+               ai.longitude as longitude,
+               ai.phone as phone,
+               ai.is_release as isRelease
+        from view_appointment va
+                 left join apartment_info ai on va.apartment_id = ai.id and ai.is_deleted = 0
+        <where>
+            va.is_deleted = 0
+            <if test="query.provinceId != null">
+                and ai.province_id = #{query.provinceId}
+            </if>
+            <if test="query.cityId != null">
+                and ai.city_id = #{query.cityId}
+            </if>
+            <if test="query.districtId != null">
+                and ai.district_id = #{query.districtId}
+            </if>
+            <if test="query.apartmentId != null">
+                and va.apartment_id = #{query.apartmentId}
+            </if>
+            <if test="query.name != null">
+                and va.name like CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.phone != null">
+                and va.phone = #{query.phone}
+            </if>
+        </where>
+    </select>
+</mapper>
