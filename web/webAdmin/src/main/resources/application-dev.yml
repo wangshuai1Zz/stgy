@@ -60,4 +60,3 @@ springdoc:
 mvc_conf:
   addPathPatterns: /**
   excludePathPatterns: /admin/login/captcha,/admin/login
-  corsRegistry: http://localhost:5173
